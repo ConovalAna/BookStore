@@ -10,7 +10,7 @@ namespace BookStore.DAL.Entities
         public string LongDescription { get; set; }
         public DateTime Date { get; set; }
         public string Edition { get; set; }
-
-        public virtual Book Book { get; set; }
+        
+        public virtual Book? Book { get; set; }
     }
 }
