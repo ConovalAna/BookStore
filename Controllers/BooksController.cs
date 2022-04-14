@@ -8,16 +8,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookStore.DAL;
 using BookStore.DAL.Entities;
+using BookStore.Services.Interfaces;
 
 namespace BookStore.Controllers
 {
     public class BooksController : Controller
     {
         private readonly ContextDB _context;
+        private readonly IBookService _bookService;
 
-        public BooksController(ContextDB context)
+        public BooksController(ContextDB context, IBookService bookService)
         {
             _context = context;
+            _bookService = bookService;
         }
 
         // GET: Books
@@ -57,12 +60,11 @@ namespace BookStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BookID,Title,ImageURL,DownloadLink,Edition,CreatedDate,CreatedBy")] Book book)
         {
-            //if (ModelState.IsValid)
-            //{
-                _context.Add(book);
-                await _context.SaveChangesAsync();
+            if (ModelState.IsValid)
+            {
+                await _bookService.AddBookAsync(book);
                 return RedirectToAction(nameof(Index));
-            //}
+            }
             return View(book);
         }
 

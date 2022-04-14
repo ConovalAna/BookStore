@@ -10,7 +10,7 @@ namespace BookStore.DAL.Entities
         public string ShortDescription { get; set; }
         public string ImageURL { get; set; }
 
-        public virtual ICollection<BookAuthor> BookAuthors { get; set; }
+        public virtual ICollection<BookAuthor>? BookAuthors { get; set; }
 
     }
 }

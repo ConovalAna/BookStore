@@ -14,8 +14,8 @@ namespace BookStore.DAL.Entities
         public int CreatedBy { get; set; }
 
 
-        public virtual BookDetails Details { get; set; }
-        public virtual ICollection<BookGenre> Genres { get; set; }
-        public virtual ICollection<BookAuthor> BookAuthors { get; set; }
+        public virtual BookDetails? Details { get; set; }
+        public virtual ICollection<BookGenre>? Genres { get; set; }
+        public virtual ICollection<BookAuthor>? BookAuthors { get; set; }
     }
 }
