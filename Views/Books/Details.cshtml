@@ -3,52 +3,199 @@
 @{
     ViewData["Title"] = "Details";
 }
-
-<h1>Details</h1>
-
-<div>
-    <h4>Book</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageURL)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageURL)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DownloadLink)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DownloadLink)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Edition)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Edition)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedBy)
-        </dd>
-    </dl>
-</div>
+@{
+    string longDescription = Model?.Details?.LongDescription ?? "";
+    string sbn = Model?.Details?.SBN ?? "";
+    int reviewNr = Model?.Reviews?.Count() ?? 0;
+    string reviewsText = reviewNr == 0 ? "No reviews" : reviewNr + " reviews";
+}
+   
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.BookID">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+
+<main class="container container-single-product">
+    <section class="single-product pt-100">
+        <div class="container rounded bg-white mt-5 mb-5 pt-5 ">
+            <div class="row">
+                <div class="col-12">
+                    <div id="shopify-section-product-template" class="shopify-section">
+                        <div class="product-details-area pb-95 common_slick_slider">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="product-details-img">
+                                        <img src=" @Html.DisplayFor(model => model.ImageURL) " class="bd-placeholder-img" xmlns="http://www.w3.org/2000/svg" role="img" focusable="false">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="product-details-content">
+                                        <div class="product-content-inner">
+                                            <h2 id="popup_cart_title">  @Html.DisplayFor(model => model.Title)</h2>
+
+                                            <div class="pro-details-rating-wrap">
+                                                <div class="pro-details-rating">
+                                                    <span class="spr-badge-caption"> @Html.DisplayFor(model => reviewsText)</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-sku pro-details-rating-wrap">SBN: @Html.DisplayFor(model => sbn) <span class="variant-sku">9915</span></div>
+                                            <div class="product-variant-inventory">
+                                                <span class="inventory-title">Availability:</span> <span class="variant-inventory">always</span>
+                                            </div>
+                                            <div class="product-description">
+                                                <p></p>
+                                                <p>
+                                                    @Html.DisplayFor(model => model.ShortDescription)
+                                                </p>
+                                            </div>
+
+                                        </div>
+                                        <div class="dynamic_btn mt-5">
+                                            <div data-shopify="payment-button" data-has-selling-plan="false" class="shopify-payment-button">
+                                                <a type="button" class="btn  btn-success" target="_blank" href="@Html.DisplayFor(model => model.DownloadLink)">Take now !</a>
+                                                @await Html.PartialAsync("../Reviews/_AddReview.cshtml")
+
+                                            </div>
+                                        </div>
+
+                                        <div class="pro-details-meta">
+                                            <span>Genres : </span>
+                                            <ul class="list-inline">
+                                                @foreach (var item in Model?.Genres ?? Enumerable.Empty<BookStore.DAL.Entities.BookGenre>())
+                                                {
+                                                    <li class="list-inline-item">
+                                                        <a class="type_link" target="_blank" href="#">
+                                                            <span class="badge  rounded-pill bg-secondary">@item.Genre.ToString()</span>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="shopify-section-single-product-tab" class="shopify-section">
+                    <div class="description-review-area pb-95">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="description-review-wrapper">
+                                        <div class="description-review-topbar nav">
+                                            <a onclick="openTab(event, 'description')" class="tablinks active" href="#description" data-toggle="tab">Description</a>
+                                            <a onclick="openTab(event, 'review')" class="tablinks" href="#review" data-toggle="tab">Reviews</a>
+                                            <a onclick="openTab(event, 'authors')" class="tablinks" href="#authors" data-toggle="tab">Authors</a>
+                                            <a onclick="openTab(event, 'custom_tab_1')" class="tablinks" href="#custom_tab_1" data-toggle="tab">Shipping Policy</a>
+                                        </div>
+                                        <div class="tab-content description-review-bottom">
+                                            <div id="description" class="tab-pane active">
+                                                <div class="product-description-wrapper">
+                                                    <p>
+
+                                                        @Html.DisplayFor(model => longDescription)
+                                                    </p>
+
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="review">
+                                                @foreach (var item in Model?.Reviews ?? Enumerable.Empty<BookStore.DAL.Entities.Review>())
+                                                {
+                                                    <p>
+                                                        <span class="badge  rounded-pill bg-secondary">item.Details</span>
+                                                    </p>
+                                                }
+                                            </div>
+                                            <div class="tab-pane" id="authors" role="tabpanel">
+                                                <h2>Authors</h2>
+                                                @foreach (var item in Model?.BookAuthors ?? Enumerable.Empty<BookStore.DAL.Entities.BookAuthor>())
+                                                {
+                                                    <p>
+                                                        <span class="badge  rounded-pill bg-secondary">item.Author?.Name</span>
+                                                    </p>
+                                                }
+                                            </div>
+                                            <div class="tab-pane" id="custom_tab_1" role="tabpanel">
+                                                <h2>Shipping policy of our store</h2>
+                                                <p>
+                                                    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation
+                                                    ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate
+                                                </p>
+                                                <ul>
+                                                    <li>1-2 business days (Typically by end of day)</li>
+                                                    <li>30 days money back guaranty</li>
+                                                    <li>24/7 live support</li>
+                                                    <li>odio dignissim qui blandit praesent</li>
+                                                    <li>luptatum zzril delenit augue duis dolore</li>
+                                                    <li>te feugait nulla facilisi.</li>
+                                                </ul>
+                                                <p>
+                                                    Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Typi non habent claritatem insitam; est usus legentis in iis qui facit eorum
+                                                </p>
+                                                <p>
+                                                    claritatem. Investigationes demonstraverunt lectores legere me lius quod ii legunt saepius. Claritas est etiam processus dynamicus, qui sequitur mutationem consuetudium lectorum. Mirum est notare quam
+                                                    littera gothica, quam nunc putamus parum claram, anteposuerit litterarum formas humanitatis per
+                                                </p>
+                                                <p>seacula quarta decima et quinta decima. Eodem modo typi, qui nunc nobis videntur parum clari, fiant sollemnes in futurum.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="shopify-section-related-product" class="shopify-section">
+                <div class="product-area pb-70 common_slick_slider related_product_area" id="section-related-product" data-section="Related_Products">
+                    <div class="container">
+
+                        <div class="section-title text-center pb-60">
+
+                            <h2>Related products</h2>
+                            <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical</p>
+
+                        </div>
+                    </div>
+                </div>
+                <div id="shopify-section-custom-collection" class="shopify-section">
+                    <div class="product-area pb-70 common_slick_slider related_product_area" id="section-custom-collection" data-section="Custom_Collection">
+                        <div class="container">
+                            <div class="section-title text-center pb-60">
+
+                                <h2>You may also like</h2>
+                                <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical</p>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </section>
+
+</main>
+
+
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-pane");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>

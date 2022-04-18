@@ -4,6 +4,7 @@ using BookStore.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStore.Migrations
 {
     [DbContext(typeof(ContextDB))]
-    partial class ContextDBModelSnapshot : ModelSnapshot
+    [Migration("20220416114709_ShortDescription")]
+    partial class ShortDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,6 +64,10 @@ namespace BookStore.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DownloadLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Edition")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -322,7 +328,7 @@ namespace BookStore.Migrations
             modelBuilder.Entity("BookStore.DAL.Entities.Review", b =>
                 {
                     b.HasOne("BookStore.DAL.Entities.Book", "Book")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("BookID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -388,8 +394,6 @@ namespace BookStore.Migrations
                     b.Navigation("Details");
 
                     b.Navigation("Genres");
-
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

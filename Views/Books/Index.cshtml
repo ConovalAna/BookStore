@@ -4,62 +4,76 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="row pb-3">
+    <div class=" filter-panel">
+        <div class="card">
+            <div class="card-body">
+                @using (Html.BeginForm("Index", "Books", FormMethod.Get))
+                {
+                    <div class=" d-flex justify-content-around" role="form">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageURL)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DownloadLink)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Edition)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedBy)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageURL)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DownloadLink)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Edition)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedBy)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.BookID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.BookID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BookID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+                        <!-- form group [rows] -->
+                    <div class="form-group">
+                            <label class="filter-col" style="margin-right:0;" for="pref-search">Search:</label>
+                            <input type="text" name="prefSearch" value="@ViewBag.PrefSearch" class="form-control input-sm" id="pref-search">
+                        </div>
+                        <!-- form group [search] -->
+                    <div class="form-group">
+                            <label class="filter-col" style="margin-right:0;" for="pref-orderby">Genres:</label>
+                            <select id="pref-orderby" name="prefOrderbyGenre" class="form-control">
+                                <option value="" selected disabled hidden>Choose here</option>
+                                @{
+                                    var genres = Enum.GetValues(typeof(BookStore.DAL.Entities.Genres)).OfType<BookStore.DAL.Entities.Genres>().ToList();
+                                    foreach (var genre in genres)
+                                    {
+                                        @if (ViewBag?.PrefOrderbyGenre == genre.ToString() ?? false)
+                                        {
+                                            <option selected value="@genre">@genre</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@genre">@genre</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <!-- form group [order by] -->
+                    <div class="form-group d-flex ">
+                            <button type="submit" class="btn btn-primary align-self-end">
+                                <span>Search</span>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 g-3">
+
+    @foreach (var item in Model)
+    {
+        <div class="col">
+            <div class="card shadow-sm card-book">
+                <div class="image_thumbnail_container">
+                    <img src="@Html.DisplayFor(modelItem => item.ImageURL)" class="bd-placeholder-img book_image_thumbnail" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false" />
+                </div>
+                <div class="card-body">
+                    <h5 class="card-text"> @Html.DisplayFor(modelItem => item.Title)</h5>
+                    <p class="card-text"> @Html.DisplayFor(modelItem => item.ShortDescription)</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <a type="button" class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.BookID">View</a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Rent</button>
+                        </div>
+                        <small class="text-muted">Time to read: 7 hours</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

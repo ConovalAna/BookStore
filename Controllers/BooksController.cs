@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using BookStore.DAL;
 using BookStore.DAL.Entities;
 using BookStore.Services.Interfaces;
+using BookStore.Models;
 
 namespace BookStore.Controllers
 {
@@ -24,8 +25,10 @@ namespace BookStore.Controllers
         }
 
         // GET: Books
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string prefSearch,string prefOrderbyGenre)
         {
+            ViewBag.PrefSearch = prefSearch;
+            ViewBag.PrefOrderbyGenre = prefOrderbyGenre;
             return View(await _context.Books.ToListAsync());
         }
 
@@ -38,6 +41,10 @@ namespace BookStore.Controllers
             }
 
             var book = await _context.Books
+                .Include(b => b.Reviews)
+                .Include(b => b.Details)
+                .Include(b => b.Genres)
+                .Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
                 .FirstOrDefaultAsync(m => m.BookID == id);
             if (book == null)
             {
@@ -76,7 +83,15 @@ namespace BookStore.Controllers
                 return NotFound();
             }
 
-            var book = await _context.Books.FindAsync(id);
+
+            var book = await _context.Books
+                .Include(b => b.Details)
+                .Include(b => b.Genres)
+                .Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
+                .FirstOrDefaultAsync(m => m.BookID == id);
+            await _bookService.AddBookAsync(book);
+
+            PopulateAssignedCourseData(book);
             if (book == null)
             {
                 return NotFound();
@@ -84,22 +99,44 @@ namespace BookStore.Controllers
             return View(book);
         }
 
+        private void PopulateAssignedCourseData(Book book)
+        {
+            var bookGenres = new HashSet<Genres>(book.Genres.Select(c => c.Genre));
+            var viewModel = new List<AssignedGenreData>();
+            var genres = Enum.GetValues(typeof(Genres)).OfType<Genres>().ToList();
+
+            foreach (var genre in genres)
+            {
+                viewModel.Add(new AssignedGenreData
+                {
+                    Genre = genre,
+                    Assigned = bookGenres.Contains(genre)
+                });
+            }
+            ViewBag.ViewGenres = viewModel;
+        }
+
         // POST: Books/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BookID,Title,ImageURL,DownloadLink,Edition,CreatedDate,CreatedBy")] Book book)
+        public async Task<IActionResult> Edit(int id, [Bind("BookID,Title,ImageURL,DownloadLink,ShortDescription,Details,Details.BookID, Details.Date,Details.Description,Details.SBN,Details.Edition")] Book book, string[] selectedGenres)
         {
             if (id != book.BookID)
             {
                 return NotFound();
             }
 
+            var bookGenres = await _context.BookGenres.Where(bg => bg.BookID == id).ToListAsync();
+            
+
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    await UpdateInstructorCourses(selectedGenres, bookGenres, id);
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
@@ -117,6 +154,43 @@ namespace BookStore.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(book);
+        }
+
+        private async Task UpdateInstructorCourses(string[] selectedGenres, List<BookGenre> bookGenresList, int bookId)
+        {
+            if (selectedGenres == null)
+            {
+               
+                return;
+            }
+            var bookGenres = bookGenresList.Select(i => i.Genre.ToString()).ToList();
+            var toAdd = selectedGenres.Where(i => !bookGenres.Contains(i)).ToList();
+            var toRemove = bookGenres.Where(i => !selectedGenres.Contains(i)).ToList();
+
+            foreach (var add in toAdd)
+            {
+                var parsed = Enum.TryParse(add, out Genres genre);
+                if (parsed)
+                {
+                    _context.BookGenres.Add(new BookGenre
+                    {
+                        BookID = bookId,
+                        Genre = genre
+                    });
+                }
+            }
+
+            foreach (var remove in toRemove)
+            {
+                var parsed = Enum.TryParse(remove, out Genres genre);
+                if (parsed)
+                {
+                    var bookGenre = bookGenresList.FirstOrDefault(g => g.Genre == genre);
+                    _context.BookGenres.Remove(bookGenre);
+                }
+            }
+            await _context.SaveChangesAsync();
+
         }
 
         // GET: Books/Delete/5

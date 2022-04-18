@@ -1,0 +1,41 @@
+﻿@{
+    string pageUrl = Context.Request.Path.ToString();
+}
+<nav class="navbar d-flex flex-wrap align-items-center justify-content-center justify-content-md-between navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Book store</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <a class="nav-link @(pageUrl.ToLower().Contains("/books") ? "active" : string.Empty)" aria-current="page" asp-controller="Books" asp-action="Index">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(pageUrl.ToLower().Contains("/books/create") ? "active" : string.Empty)" aria-current="page" asp-controller="Books" asp-action="Create">Add book</a>
+                </li>
+            </ul>
+            <div class="text-end">
+                <a class="btn btn-outline-light me-2" href="@Url.Action("Login", "Account")" role="button">Login</a>
+                <a class="btn btn-warning" href="@Url.Action("Signup", "Account")" role="button">Sign up</a>
+            </div>
+
+          @*  <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 dropdown">
+                    <a href="#" class="d-block link-info text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small user-profile" style="position: absolute;inset: 0px 0px auto auto;margin: 0px;transform: translate(0px, 34px);" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="./userprofile.html">View Profile</a></li>
+                        <li><a class="dropdown-item" href="./editProfile.html">Edit Profile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="./login.html">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>*@
+        </div>
+    </div>
+</nav>
