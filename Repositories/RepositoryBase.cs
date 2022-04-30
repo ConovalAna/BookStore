@@ -19,7 +19,7 @@ namespace BookStore.Repositories
             return this.ContextDB.Set<T>().AsNoTracking();
         }
 
-        public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression)
+        public virtual IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression)
         {
             return this.ContextDB.Set<T>().Where(expression).AsNoTracking();
         }

@@ -25,11 +25,12 @@ namespace BookStore.Controllers
         }
 
         // GET: Books
-        public async Task<IActionResult> Index(string prefSearch,string prefOrderbyGenre)
+        public async Task<IActionResult> Index(string prefSearch, string prefOrderbyGenre)
         {
             ViewBag.PrefSearch = prefSearch;
             ViewBag.PrefOrderbyGenre = prefOrderbyGenre;
-            return View(await _context.Books.ToListAsync());
+            var books = _bookService.GetFilteredBooks(prefSearch, prefOrderbyGenre);
+            return View(books);
         }
 
         // GET: Books/Details/5
@@ -39,13 +40,8 @@ namespace BookStore.Controllers
             {
                 return NotFound();
             }
+            var book = _bookService.GetBookModelForEdit(id.GetValueOrDefault());
 
-            var book = await _context.Books
-                .Include(b => b.Reviews)
-                .Include(b => b.Details)
-                .Include(b => b.Genres)
-                .Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
-                .FirstOrDefaultAsync(m => m.BookID == id);
             if (book == null)
             {
                 return NotFound();
@@ -83,37 +79,16 @@ namespace BookStore.Controllers
                 return NotFound();
             }
 
+            var book = _bookService.GetBookModelForEdit(id.GetValueOrDefault());
+            var viewModel = _bookService.GetBookAssignedGenres(book);
 
-            var book = await _context.Books
-                .Include(b => b.Details)
-                .Include(b => b.Genres)
-                .Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
-                .FirstOrDefaultAsync(m => m.BookID == id);
-            await _bookService.AddBookAsync(book);
+            ViewBag.ViewGenres = viewModel;
 
-            PopulateAssignedCourseData(book);
             if (book == null)
             {
                 return NotFound();
             }
             return View(book);
-        }
-
-        private void PopulateAssignedCourseData(Book book)
-        {
-            var bookGenres = new HashSet<Genres>(book.Genres.Select(c => c.Genre));
-            var viewModel = new List<AssignedGenreData>();
-            var genres = Enum.GetValues(typeof(Genres)).OfType<Genres>().ToList();
-
-            foreach (var genre in genres)
-            {
-                viewModel.Add(new AssignedGenreData
-                {
-                    Genre = genre,
-                    Assigned = bookGenres.Contains(genre)
-                });
-            }
-            ViewBag.ViewGenres = viewModel;
         }
 
         // POST: Books/Edit/5
@@ -128,17 +103,12 @@ namespace BookStore.Controllers
                 return NotFound();
             }
 
-            var bookGenres = await _context.BookGenres.Where(bg => bg.BookID == id).ToListAsync();
-            
-
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await UpdateInstructorCourses(selectedGenres, bookGenres, id);
-                    _context.Update(book);
-                    await _context.SaveChangesAsync();
+                    await _bookService.EditBook(book);
+                    await _bookService.UpdateBookGenres(selectedGenres, book.BookID);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -152,45 +122,9 @@ namespace BookStore.Controllers
                     }
                 }
                 return RedirectToAction(nameof(Index));
+
             }
             return View(book);
-        }
-
-        private async Task UpdateInstructorCourses(string[] selectedGenres, List<BookGenre> bookGenresList, int bookId)
-        {
-            if (selectedGenres == null)
-            {
-               
-                return;
-            }
-            var bookGenres = bookGenresList.Select(i => i.Genre.ToString()).ToList();
-            var toAdd = selectedGenres.Where(i => !bookGenres.Contains(i)).ToList();
-            var toRemove = bookGenres.Where(i => !selectedGenres.Contains(i)).ToList();
-
-            foreach (var add in toAdd)
-            {
-                var parsed = Enum.TryParse(add, out Genres genre);
-                if (parsed)
-                {
-                    _context.BookGenres.Add(new BookGenre
-                    {
-                        BookID = bookId,
-                        Genre = genre
-                    });
-                }
-            }
-
-            foreach (var remove in toRemove)
-            {
-                var parsed = Enum.TryParse(remove, out Genres genre);
-                if (parsed)
-                {
-                    var bookGenre = bookGenresList.FirstOrDefault(g => g.Genre == genre);
-                    _context.BookGenres.Remove(bookGenre);
-                }
-            }
-            await _context.SaveChangesAsync();
-
         }
 
         // GET: Books/Delete/5
@@ -200,9 +134,8 @@ namespace BookStore.Controllers
             {
                 return NotFound();
             }
+            var book = _bookService.GetBookModelForEdit(id.GetValueOrDefault());
 
-            var book = await _context.Books
-                .FirstOrDefaultAsync(m => m.BookID == id);
             if (book == null)
             {
                 return NotFound();
@@ -216,9 +149,8 @@ namespace BookStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+
+             await _bookService.DeleteBook(id);
             return RedirectToAction(nameof(Index));
         }
 

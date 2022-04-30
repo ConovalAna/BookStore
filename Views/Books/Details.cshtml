@@ -9,7 +9,7 @@
     int reviewNr = Model?.Reviews?.Count() ?? 0;
     string reviewsText = reviewNr == 0 ? "No reviews" : reviewNr + " reviews";
 }
-   
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.BookID">Edit</a> |
     <a asp-action="Index">Back to List</a>
@@ -55,7 +55,9 @@
                                         <div class="dynamic_btn mt-5">
                                             <div data-shopify="payment-button" data-has-selling-plan="false" class="shopify-payment-button">
                                                 <a type="button" class="btn  btn-success" target="_blank" href="@Html.DisplayFor(model => model.DownloadLink)">Take now !</a>
-                                                @await Html.PartialAsync("../Reviews/_AddReview.cshtml")
+                                                @await Html.PartialAsync("../Reviews/_AddReview.cshtml",
+                                                    new ViewDataDictionary(this.ViewData))
+                                                
 
                                             </div>
                                         </div>

@@ -56,7 +56,8 @@
                     <div class="row mt-2">
                         <div class="col-md-12">
                             <label class="labels">Authors</label>
-                            <input type="text" class="form-control" value="" accept="number" placeholder="Authors">
+@*                             @Html.ListBoxFor(model => model.SelectedAuthorsIDArray, new MultiSelectList(Model.EmployeeCollection, "EmployeeID", "Name"), new { id = "multiSelectDropDown", multiple = "multiple" })
+*@                            <input type="text" class="form-control" value="" accept="number" placeholder="Authors">
                         </div>
                     </div>
                     <div class="row mt-3">

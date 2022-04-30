@@ -6,7 +6,8 @@ namespace BookStore.Repositories
     public class RepositoryWrapper : IRepositoryWrapper
     {
         private ContextDB _contextDB;
-        private IBookRepository? _bookRepository;   
+        private IBookRepository? _bookRepository;
+        private IBookGenresRepository? _bookGenresRepository;
 
         public IBookRepository BookRepository
         {
@@ -18,6 +19,18 @@ namespace BookStore.Repositories
                 }
 
                 return _bookRepository;
+            }
+        }
+        public IBookGenresRepository BookGenresRepository
+        {
+            get
+            {
+                if (_bookGenresRepository == null)
+                {
+                    _bookGenresRepository = new BookGenresRepository(_contextDB);
+                }
+
+                return _bookGenresRepository;
             }
         }
 
