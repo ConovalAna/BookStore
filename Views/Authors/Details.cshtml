@@ -1,0 +1,60 @@
+﻿@model BookStore.DAL.Entities.Author
+
+@{
+    ViewData["Title"] = "Details";
+}
+<div class="container card">
+    <div class=" row p-4 p-md-5 mb-4 text-white rounded bg-dark">
+        <div class="col-md-6 px-0">
+            <h1 class="display-4 fst-italic"> @Html.DisplayFor(model => model.Name)</</h1>
+            <p class="lead my-3 text-truncate" style="max-width: 900px;">@Html.DisplayFor(model => model.ShortDescription)</p>
+        </div>
+        <div class="col-md-6 px-0">
+            <img style="max-height: 350px;" src=" @Html.DisplayFor(model => model.ImageURL) " class="rounded float-end" alt="...">
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-md-8">
+            <h3 class="pb-4 mb-4 fst-italic border-bottom">
+                From the Wikipedia
+            </h3>
+
+            <article class="blog-post">
+
+                <h2>Biografie</h2>
+                <p>@Html.DisplayFor(model => model.ShortDescription)
+                </p>
+            </article>
+
+        </div>
+
+        <div class="col-md-4">
+            <div class="position-sticky" style="top: 2rem;">
+                <div class="p-4">
+                    <h4 class="fst-italic">Fairy tales</h4>
+                    <ol class="list-unstyled mb-0">
+                        <li><a href="#"> Capra cu trei iezi (1875)</a></li>
+                        <li><a href="#">Dănilă Prepeleac (1876)</a></li>
+                        <li><a href="#">Fata babei și fata moșneagului (1877)</a></li>
+                        <li><a href="#">Făt Frumos, fiul iepei (1877)</a></li>
+                        <li><a href="#">Povestea lui Harap-Alb (1877)</a></li>
+                        <li><a href="#">Ivan Turbincă (1878)</a></li>
+                        <li><a href="#">Povestea lui Ionică cel prost (1877)</a></li>
+                        <li><a href="#">Povestea lui Stan-Pățitul (1877)</a></li>
+                        <li><a href="#">Povestea porcului (1876)</a></li>
+                        <li><a href="#">Povestea poveștilor (1877-1878)</a></li>
+                        <li><a href="#">Povestea unui om leneș (1878)</a></li>
+                        <li><a href="#">Punguța cu doi bani (1875)</a></li>
+                        <li><a href="#">Soacra cu trei nurori (1875)</a></li>
+                        <li><a href="#">More...</a></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model?.AuthorID">Edit</a> |
+        <a asp-action="Index">Back to List</a>
+    </div>
+</div>

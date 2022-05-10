@@ -1,27 +1,21 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookStore.DAL;
 using BookStore.DAL.Entities;
 using BookStore.Services.Interfaces;
-using BookStore.Models;
 
 namespace BookStore.Controllers
 {
     public class BooksController : Controller
     {
-        private readonly ContextDB _context;
         private readonly IBookService _bookService;
+        private readonly IUserService _userService;
 
-        public BooksController(ContextDB context, IBookService bookService)
+        public BooksController( IBookService bookService, IUserService userService)
         {
-            _context = context;
             _bookService = bookService;
+            _userService = userService;
         }
 
         // GET: Books
@@ -40,7 +34,8 @@ namespace BookStore.Controllers
             {
                 return NotFound();
             }
-            var book = _bookService.GetBookModelForEdit(id.GetValueOrDefault());
+
+            var book = _bookService.GetBookWithReviews(id.GetValueOrDefault());
 
             if (book == null)
             {
@@ -56,17 +51,30 @@ namespace BookStore.Controllers
             return View();
         }
 
+        public async Task<IActionResult> GetBook(int? id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+            await _userService.AssignBookAsync(id.GetValueOrDefault());
+            return RedirectToAction(nameof(Index));
+        }
+
         // POST: Books/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BookID,Title,ImageURL,DownloadLink,Edition,CreatedDate,CreatedBy")] Book book)
+        public async Task<IActionResult> Create([Bind("BookID,Title,ImageURL,DownloadLink, ShortDescription")] Book book)
         {
+            book.CreatedDate = DateTime.Now;
+            book.CreatedBy = 1;
+
             if (ModelState.IsValid)
             {
                 await _bookService.AddBookAsync(book);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Edit), new { id = book.BookID });
             }
             return View(book);
         }
@@ -81,8 +89,11 @@ namespace BookStore.Controllers
 
             var book = _bookService.GetBookModelForEdit(id.GetValueOrDefault());
             var viewModel = _bookService.GetBookAssignedGenres(book);
+            var authors = _bookService.GetAuthors();
 
+            book.SelectedAuthorsIDArray = book?.BookAuthors?.Select(ba => ba.AuthorID)?.ToArray() ?? Array.Empty<int>();
             ViewBag.ViewGenres = viewModel;
+            ViewBag.AuthorsCollection = authors;
 
             if (book == null)
             {
@@ -96,23 +107,23 @@ namespace BookStore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BookID,Title,ImageURL,DownloadLink,ShortDescription,Details,Details.BookID, Details.Date,Details.Description,Details.SBN,Details.Edition")] Book book, string[] selectedGenres)
+        public async Task<IActionResult> Edit(int id, [Bind("BookID,Title,ImageURL,DownloadLink,ShortDescription,Details,Details.BookID, Details.Date,Details.Description,Details.SBN,Details.Edition, SelectedAuthorsIDArray")] Book book, string[] selectedGenres)
         {
             if (id != book.BookID)
             {
                 return NotFound();
             }
+            if (book.Details?.BookID == 0) book.Details.BookID = book.BookID;
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _bookService.EditBook(book);
-                    await _bookService.UpdateBookGenres(selectedGenres, book.BookID);
+                    await _bookService.UpdateBookAsync(selectedGenres, book);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BookExists(book.BookID))
+                    if (!_bookService.BookExists(book.BookID))
                     {
                         return NotFound();
                     }
@@ -124,6 +135,11 @@ namespace BookStore.Controllers
                 return RedirectToAction(nameof(Index));
 
             }
+            var viewModel = _bookService.GetBookAssignedGenres(book);
+            var authors = _bookService.GetAuthors();
+            ViewBag.ViewGenres = viewModel;
+            ViewBag.AuthorsCollection = authors;
+
             return View(book);
         }
 
@@ -150,13 +166,8 @@ namespace BookStore.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
 
-             await _bookService.DeleteBook(id);
+            await _bookService.DeleteBookAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool BookExists(int id)
-        {
-            return _context.Books.Any(e => e.BookID == id);
         }
     }
 }

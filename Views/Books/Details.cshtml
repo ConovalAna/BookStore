@@ -56,8 +56,8 @@
                                             <div data-shopify="payment-button" data-has-selling-plan="false" class="shopify-payment-button">
                                                 <a type="button" class="btn  btn-success" target="_blank" href="@Html.DisplayFor(model => model.DownloadLink)">Take now !</a>
                                                 @await Html.PartialAsync("../Reviews/_AddReview.cshtml",
-                                                    new ViewDataDictionary(this.ViewData))
-                                                
+                                                new ViewDataDictionary(this.ViewData))
+
 
                                             </div>
                                         </div>
@@ -105,21 +105,30 @@
                                                 </div>
                                             </div>
                                             <div class="tab-pane" id="review">
-                                                @foreach (var item in Model?.Reviews ?? Enumerable.Empty<BookStore.DAL.Entities.Review>())
-                                                {
-                                                    <p>
-                                                        <span class="badge  rounded-pill bg-secondary">item.Details</span>
-                                                    </p>
-                                                }
+                                                <ul class="list-group">
+                                                    @foreach (var item in Model?.Reviews ?? Enumerable.Empty<BookStore.DAL.Entities.Review>())
+                                                    {
+
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            @item.Details
+                                                            <span class="badge badge-primary badge-pill">@item.Rating</span>
+                                                        </li>
+                                                    }
+                                                </ul>
                                             </div>
                                             <div class="tab-pane" id="authors" role="tabpanel">
                                                 <h2>Authors</h2>
-                                                @foreach (var item in Model?.BookAuthors ?? Enumerable.Empty<BookStore.DAL.Entities.BookAuthor>())
-                                                {
-                                                    <p>
-                                                        <span class="badge  rounded-pill bg-secondary">item.Author?.Name</span>
-                                                    </p>
-                                                }
+                                                <ul class="list-group">
+                                                    @foreach (var item in Model?.BookAuthors ?? Enumerable.Empty<BookStore.DAL.Entities.BookAuthor>())
+                                                    {
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            @item.Author?.Name
+                                                            <a asp-controller="Authors" asp-action="Details" asp-route-id="@item.Author?.AuthorID">About</a>
+                                                        </li>
+
+                                                    }
+
+                                                </ul>
                                             </div>
                                             <div class="tab-pane" id="custom_tab_1" role="tabpanel">
                                                 <h2>Shipping policy of our store</h2>
@@ -157,10 +166,6 @@
                     <div class="container">
 
                         <div class="section-title text-center pb-60">
-
-                            <h2>Related products</h2>
-                            <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical</p>
-
                         </div>
                     </div>
                 </div>
@@ -168,10 +173,6 @@
                     <div class="product-area pb-70 common_slick_slider related_product_area" id="section-custom-collection" data-section="Custom_Collection">
                         <div class="container">
                             <div class="section-title text-center pb-60">
-
-                                <h2>You may also like</h2>
-                                <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical</p>
-
                             </div>
 
                         </div>

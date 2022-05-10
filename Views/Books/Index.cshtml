@@ -68,9 +68,17 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
                             <a type="button" class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.BookID">View</a>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Rent</button>
+
+                            @if (item.UserReadBook)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary" disabled= "true">Getted</button>
+                            }
+                            else
+                            {
+                                <a type="button" class="btn btn-sm btn-outline-secondary" asp-action="GetBook" asp-route-id="@item.BookID">Get</a>
+                            }
                         </div>
-                        <small class="text-muted">Time to read: 7 hours</small>
+                        <small class="text-muted">Time to read: @(item.Title.Length%5)  hours</small>
                     </div>
                 </div>
             </div>

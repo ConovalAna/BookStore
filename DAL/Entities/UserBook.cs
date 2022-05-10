@@ -6,8 +6,8 @@ namespace BookStore.DAL.Entities
     {
         [Key]
         public int UserBookID { get; set; }
-        public int UserId { get; set; }
-        public int BookId { get; set; }
+        public int UserProfileID { get; set; }
+        public int BookID { get; set; }
         public DateTime DownloadDate { get; set; }
 
         public virtual Book Book { get; set; }

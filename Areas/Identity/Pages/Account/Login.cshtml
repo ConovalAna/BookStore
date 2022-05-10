@@ -1,0 +1,51 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<main class="login-container">
+    <div class="modal modal-signin position-static d-block py-5" tabindex="-1" role="dialog" id="modalSignin">
+        <div class="modal-dialog" role="document">
+            <form id="account" method="post">
+                <div class="modal-content rounded-5 shadow">
+                    <div class="modal-header p-5 pb-4 border-bottom-0">
+                        <h2 class="fw-bold mb-0">Sign in</h2>
+
+                    </div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="modal-body p-5 pt-0">
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control rounded-4" autocomplete="username" aria-required="true" />
+                            <label asp-for="Input.Email" class="form-label"></label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Password" class="form-control rounded-4" autocomplete="current-password" aria-required="true" />
+                            <label asp-for="Input.Password"></label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>  
+                        <button class="w-100 mb-2 btn btn-lg rounded-4 btn-primary" id="login-submit" type="submit" role="button">Sign in</button>
+                        <small class="text-muted">By clicking Sign up, you agree to the terms of use.</small>
+                        <div>
+                            <p>
+                                <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                            </p>
+                            <p>
+                                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                            </p>
+                            <p>
+                                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

@@ -3,7 +3,15 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-<button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#exampleModal">Add Review</button>
+@if (this.ViewData.Model?.UserAddedReview)
+{
+    <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#exampleModal">Edit Review</button>
+}
+else
+{
+    <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#exampleModal">Add Review</button>
+}
+
 
 
 <div id="exampleModal" class="modal" tabindex="-1" role="dialog">
@@ -21,7 +29,7 @@
                      <h5 class="modal-title">@this.ViewData?.Model?.Title</h5>
                     <div class="form-group">
                         <label for="Rating" class="control-label"  min="1" max="5" >Rating</label>
-                        <input type="number" name="Rating" class="form-control" />
+                        <input type="number" name="Rating" class="form-control"  min="1" max="5" />
                     </div>
                     <div class="form-group">
                         <label for="Details" class="control-label">Description</label>

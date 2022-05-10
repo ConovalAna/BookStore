@@ -8,10 +8,12 @@ namespace BookStore.Services
     public class BookService : IBookService
     {
         private IRepositoryWrapper _repositoryWrapper;
+        private IUserService _userService;
 
-        public BookService(IRepositoryWrapper repositoryWrapper)
+        public BookService(IRepositoryWrapper repositoryWrapper, IUserService userService)
         {
             _repositoryWrapper = repositoryWrapper;
+            _userService = userService;
         }
 
         public async Task<int> AddBookAsync(Book book)
@@ -27,11 +29,21 @@ namespace BookStore.Services
         }
 
 
-        public async Task EditBook(Book book)
+        public async Task EditBookAsync(Book book)
         {
             var result = 0;
 
             var bookExist = _repositoryWrapper.BookRepository.FindByCondition(i => i.BookID == book.BookID).Any();
+            var bookDetailsExist = _repositoryWrapper.BookDetailsRepository.FindByCondition(i => i.BookID == book.BookID).Any();
+            if (bookDetailsExist)
+            {
+                _repositoryWrapper.BookDetailsRepository.Update(book.Details);
+            }
+            else
+            {
+                _repositoryWrapper.BookDetailsRepository.Create(book.Details);
+
+            }
             if (bookExist)
             {
                 _repositoryWrapper.BookRepository.Update(book);
@@ -44,6 +56,17 @@ namespace BookStore.Services
         {
             var book = _repositoryWrapper.BookRepository.FindByCondition(i => i.BookID == id).FirstOrDefault();
 
+            return book;
+        }
+
+        public Book GetBookWithReviews(int id)
+        {
+            var book = _repositoryWrapper.BookRepository.FindByCondition(i => i.BookID == id).FirstOrDefault();
+            if (book != null)
+            {
+                var reviews = _repositoryWrapper.ReviewRepository.FindByCondition(item => item.BookID == id).ToList();
+                book.Reviews = reviews;
+            }
             return book;
         }
 
@@ -81,12 +104,25 @@ namespace BookStore.Services
                 }
             }
 
+            foreach (var book in books)
+            {
+                if (_userService.UserHasBook(book.BookID))
+                {
+                    book.UserReadBook = true;
+                }
+
+                if (_userService.UserHasBook(book.BookID))
+                {
+                    book.UserReadBook = true;
+                }
+            }
+
             return books;
         }
 
         public List<AssignedGenreData> GetBookAssignedGenres(Book book)
         {
-            var bookGenres = new HashSet<Genres>(book.Genres?.Select(c => c.Genre));
+            var bookGenres = new HashSet<Genres>(book.Genres?.Select(c => c.Genre) ?? new HashSet<Genres>());
             var viewModel = new List<AssignedGenreData>();
             var genres = Enum.GetValues(typeof(Genres)).OfType<Genres>().ToList();
 
@@ -102,7 +138,32 @@ namespace BookStore.Services
             return viewModel;
         }
 
-        public async Task UpdateBookGenres(string[] selectedGenres, int bookId)
+        public IEnumerable<Author> GetAuthors()
+        {
+            return _repositoryWrapper.AuthorRepository.FindAll().ToList();
+        }
+        public async Task UpdateBookAsync(string[] selectedGenres, Book book)
+        {
+            var selectedAuthors = book.SelectedAuthorsIDArray;
+
+            await EditBookAsync(book);
+
+            if (selectedGenres != null)
+            {
+                await UpdateBookGenresAsync(selectedGenres, book.BookID);
+            }
+
+
+            if (selectedAuthors != null)
+            {
+                await UpdateBookAuthors(selectedAuthors, book.BookID);
+            }
+
+
+            await _repositoryWrapper.SaveAsync();
+        }
+
+        public async Task UpdateBookGenresAsync(string[] selectedGenres, int bookId)
         {
             if (selectedGenres == null)
             {
@@ -119,8 +180,22 @@ namespace BookStore.Services
 
             await _repositoryWrapper.SaveAsync();
         }
+        public async Task UpdateBookAuthors(int[] selectedAuthors, int bookId)
+        {
+            if (selectedAuthors == null)
+            {
+                return;
+            }
 
-        public async Task DeleteBook(int bookId)
+            var bookAuthors = _repositoryWrapper.BookAuthorRepository.FindByCondition(i => i.BookID == bookId).ToList();
+
+            AddBookAuthors(selectedAuthors, bookId, bookAuthors);
+            DeleteBookAuthors(selectedAuthors, bookAuthors);
+
+            await _repositoryWrapper.SaveAsync();
+        }
+
+        public async Task DeleteBookAsync(int bookId)
         {
             var book = _repositoryWrapper.BookRepository.FindByCondition(i => i.BookID == bookId).FirstOrDefault();
 
@@ -132,6 +207,12 @@ namespace BookStore.Services
             _repositoryWrapper.BookRepository.Delete(book);
 
             await _repositoryWrapper.SaveAsync();
+        }
+
+
+        public bool BookExists(int id)
+        {
+            return _repositoryWrapper.BookRepository.FindByCondition(e => e.BookID == id).Any();
         }
 
         #region Private 
@@ -162,6 +243,30 @@ namespace BookStore.Services
                     var bookGenreToRemove = bookGenres.FirstOrDefault(i => i.Genre == genre);
                     _repositoryWrapper.BookGenresRepository.Delete(bookGenreToRemove);
                 }
+            }
+        }
+
+        private void AddBookAuthors(int[] selectedAuthors, int bookId, List<BookAuthor> bookAuthors)
+        {
+            var toAdd = selectedAuthors.Where(i => !bookAuthors.Any(item => item.AuthorID == i)).ToList();
+
+            foreach (var add in toAdd)
+            {
+                _repositoryWrapper.BookAuthorRepository.Create(new BookAuthor
+                {
+                    BookID = bookId,
+                    AuthorID = add,
+                });
+            }
+        }
+
+        private void DeleteBookAuthors(int[] selectedAuthors, List<BookAuthor> bookAuthors)
+        {
+            var toRemove = bookAuthors.Where(i => !selectedAuthors.Contains(i.AuthorID)).ToList();
+
+            foreach (var remove in toRemove)
+            {
+                _repositoryWrapper.BookAuthorRepository.Delete(remove);
             }
         }
 

@@ -1,0 +1,62 @@
+﻿@model BookStore.DAL.Entities.Author
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class=" container rounded bg-white mt-5 mb-5">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row">
+            <div class="col-md-4 border-right">
+                <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                    <img class="mt-1" id="bookImage" width="250px" src="https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png">
+                    <input asp-for="ImageURL" class="form-control" />
+                    <span asp-validation-for="ImageURL" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-8 border-right">
+                <div class="p-3 py-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-right">Edit</h4>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label class="labels">Author name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Name..." />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                    </div>
+                    <div class="row mt-2">
+                    </div>
+
+
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="shortbookDescription">About</label>
+                                @Html.TextAreaFor(model => model.ShortDescription, new { @rows = 5, @class = "form-control"})
+
+                                <span asp-validation-for="ShortDescription" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="mt-5 text-center">
+                            <button class="btn btn-primary profile-button" type="submit" value="Create">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
